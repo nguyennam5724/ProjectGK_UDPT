@@ -1,49 +1,37 @@
-import { typesense } from '@/lib/typesense';
-import { _hit } from '@/types/typesenseResponse';
-import { useEffect, useRef, useState } from 'react';
-import { SearchParams } from 'typesense/lib/Typesense/Documents';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { _documentSchema } from '@/types/typesenseResponse';
 
-/*
- * Search logic for <ImageSearch/>
+/**
+ * Hook tìm ảnh bằng mô tả văn bản (Text-to-Image Search)
  */
-export default function useImageSearch(searchParameters: SearchParams) {
-  const page = useRef(0);
-  const [hits, setHits] = useState<any>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isLastPage, setIsLastPage] = useState(false);
-  const [isNoResults, setIsNoResults] = useState(false);
+export default function useImageSearchText(query: string) {
+  const [results, setResults] = useState<_documentSchema[]>([]);
 
   useEffect(() => {
-    fetchNextPage();
-  }, []);
+    const fetchData = async () => {
+      try {
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_TYPESENSE_API_URL}/collections/DiffusionDB/documents/search`,
+          {
+            q: query,
+            per_page: 25,
+            query_by: 'prompt',
+            exclude_fields: ['embedding'],
+          },
+          {
+            headers: {
+              'X-TYPESENSE-API-KEY': process.env.NEXT_PUBLIC_TYPESENSE_API_KEY,
+            },
+          }
+        );
+        setResults(response.data.hits.map((h: any) => h.document));
+      } catch (err) {
+        console.error('Error fetching text search results', err);
+      }
+    };
+    fetchData();
+  }, [query]);
 
-  const fetchNextPage = async () => {
-    setIsLoading(true);
-    page.current++;
-    try {
-      const res = await typesense
-        .collections('DiffusionDB')
-        .documents()
-        .search({
-          ...searchParameters,
-          page: page.current,
-        });
-      const isNoHitsReturned = res.hits?.length ? false : true;
-      setIsLastPage(isNoHitsReturned);
-      setHits((prev: _hit[]) => {
-        setIsNoResults(isNoHitsReturned && prev.length === 0 ? true : false);
-        return [...prev, ...(res.hits || [])];
-      });
-    } catch (error) {
-      alert('Sorry, there is an error fetching data!');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return { hits, fetchNextPage, isLoading, isLastPage, isNoResults };
+  return results;
 }
-
-// Commit 1: setup similarity search logic (by Nam)
-
-// Commit 3: refactor and optimize search logic (by Nam)
