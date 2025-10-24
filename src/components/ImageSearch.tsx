@@ -3,7 +3,8 @@ import useImageSearch from '@/hooks/useImageSearch';
 import { useEffect } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { SearchParams } from 'typesense/lib/Typesense/Documents';
-import InfiniteHits from './InfiniteHits_similarity';
+import InfiniteHits from './InfiniteHits';
+
 
 /*
  * This component make queries to typesense using the props `searchParameters` and render the InfiniteHits
