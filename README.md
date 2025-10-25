@@ -47,7 +47,7 @@ To run this project locally, make sure you have docker and nodejs, install depen
 Installation
 
 ```shell
-git clone https://github.com/typesense/showcase-ai-image-search.git
+git clone https://github.com/nguyennam5724/ProjectGK_UDPT
 
 cd showcase-ai-image-search
 
@@ -101,3 +101,4 @@ DIFFUSION_DB_JSONL_FILE=...
 TYPESENSE_ADMIN_API_KEY=...
 INDEXING_BATCH_SIZE=100
 ```
+
